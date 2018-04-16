@@ -86,8 +86,8 @@ archiveFile = os.path.join(dirs['archiveDir'], yesterdayStr)
 # Generate mp4 from the still images recorded the day before
 os.system(
     'cat %s | ' % inputFiles +
-    'ffmpeg -framerate 6 -f image2pipe -vcodec mjpeg -i - ' +
-    '-vcodec libx264 -b:v 2048k -y %s' % outputFile
+    'ffmpeg -loglevel 10 - nostats -framerate 6 -f image2pipe -vcodec mjpeg ' +
+    '-i - -vcodec libx264 -b:v 2048k -y %s' % outputFile
 )
 
 # Archive the images used for the video and delete original folder
