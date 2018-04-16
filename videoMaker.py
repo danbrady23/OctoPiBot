@@ -3,7 +3,7 @@
 import os
 import requests
 from time import sleep
-from shutil import make_archive, rmtree
+from shutil import make_archive
 from datetime import date, timedelta
 from twython import Twython
 from auth import (
