@@ -1,9 +1,9 @@
 
 # Import all the things!
 import os
-import shutil
 import requests
 from time import sleep
+from shutil import make_archive, rmtree
 from datetime import date, timedelta
 from twython import Twython
 from auth import (
@@ -60,6 +60,10 @@ def tweetVideo(fileName):
 yesterday = date.today() - timedelta(1)
 yesterdayStr = yesterday.strftime('%Y-%m-%d')
 
+# Set working directory as home
+os.chdir(os.path.expanduser("~"))
+
+# Dictionary of directories
 dirs = {
     'archiveDir': 'archive',
     'outputDir': 'videos',
@@ -87,8 +91,8 @@ os.system(
 )
 
 # Archive the images used for the video and delete original folder
-shutil.make_archive(archiveFile, 'zip', dirs['inputDir'])
-shutil.rmtree(dir['inputDir'])
+make_archive(archiveFile, 'zip', dirs['inputDir'])
+rmtree(dir['inputDir'])
 
 # Try and tweet the videos
 tweetVideo(outputFile)
