@@ -57,11 +57,6 @@ def tweetVideo(fileName):
             attempt += 1
 
 
-if len(sys.argv) < 2:
-    fps = sys.argv[1]
-else:
-    fps = "15"
-
 # Generate string for yesterdays files
 yesterday = date.today() - timedelta(1)
 yesterdayStr = yesterday.strftime('%Y-%m-%d')
@@ -94,7 +89,7 @@ if not(os.path.exists(outputFile)):
     # If not generate mp4 from the still images recorded the day before
     os.system(
         'cat %s | ' % inputFiles +
-        'ffmpeg -loglevel 10 - nostats -framerate %s -f image2pipe ' % fps +
+        'ffmpeg -loglevel 10 - nostats -framerate 15 -f image2pipe ' +
         '-vcodec mjpeg -i - -vcodec libx264 -b:v 2048k -y %s' % outputFile
     )
 
