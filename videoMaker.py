@@ -6,7 +6,7 @@ import sys
 from time import sleep
 from shutil import make_archive
 from datetime import date, timedelta
-from twython import Twython
+from twython import Twython, exceptions
 from auth import (
     consumer_key,
     consumer_secret,
@@ -41,15 +41,20 @@ def tweetVideo(fileName):
 
             message = 'Garden timelapse - %s' % yesterday.strftime('%d-%m-%Y')
             video = open(fileName, 'rb')
-            response = twitter.upload_video(
-                media=video,
-                media_type='video/mp4',
-                media_category='tweet_video',
-                check_progress=True)
 
-            twitter.update_status(
-                status=message, media_ids=[response['media_id']])
-            return
+            # Maybe add try so that if it mucks up/timesout then it'll retry
+            try:
+                response = twitter.upload_video(
+                    media=video,
+                    media_type='video/mp4',
+                    media_category='tweet_video',
+                    check_progress=True)
+
+                twitter.update_status(
+                    status=message, media_ids=[response['media_id']])
+                return
+            except exceptions.TwythonError:
+                attempt += 1
 
         # If internet is not currently available then wait and retry
         else:
