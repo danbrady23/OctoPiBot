@@ -85,7 +85,7 @@ for key in dirs:
 # Input
 inputFiles = os.path.join(dirs['inputDir'], '*.jpg')
 # Output
-outputFile = os.path.join(dirs['outputDir'], '%s.mp4' % yesterdayStr)
+outputFile = os.path.join(dirs['outputDir'], '%s.mov' % yesterdayStr)
 # Archive
 archiveFile = os.path.join(dirs['archiveDir'], yesterdayStr)
 
@@ -95,8 +95,15 @@ if not(os.path.exists(outputFile)):
     os.system(
         'cat %s | ' % inputFiles +
         'ffmpeg -loglevel 10 -nostats -framerate %s -f image2pipe ' % fps +
-        '-vcodec mjpeg -i - -vcodec libx264 -b:v 2048k -y %s' % outputFile
+        '-vcodec mjpeg -i - -vcodec libx264 -b:v 2048k -y temp.mov'
     )
+    # Cut before dawn and after dusk
+    os.system(
+        'ffmpeg -loglevel 10 -nostats -i temp.mov ' +
+        '-ss 00:00:16.0 -to 00:01:32.0 -c copy %s' % outputFile
+    )
+    # Delete temporary file
+    os.remove('temp.mov')
 
 # Archive the images used for the video and delete original folder
 make_archive(archiveFile, 'zip', dirs['inputDir'])
