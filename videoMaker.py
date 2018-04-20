@@ -42,7 +42,7 @@ def tweetVideo(fileName):
             message = 'Garden timelapse - %s' % yesterday.strftime('%d-%m-%Y')
             video = open(fileName, 'rb')
 
-            # Mabe add try so that if it mucks up/timesout then it'll retry
+            # Maybe add try so that if it mucks up/timesout then it'll retry
             try:
                 response = twitter.upload_video(
                     media=video,
