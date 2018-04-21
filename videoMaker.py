@@ -5,7 +5,7 @@ import requests
 import sys
 from time import sleep
 from shutil import make_archive
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from twython import Twython, exceptions
 from auth import (
     consumer_key,
@@ -13,6 +13,13 @@ from auth import (
     access_token,
     access_token_secret
 )
+
+
+def timestampedMessage(messageString):
+    print(
+        "%s - %s" %
+        (datetime.now().time().strftime('%H:%M:%S'), messageString)
+    )
 
 
 # Function to check internet connectivity
@@ -42,30 +49,42 @@ def tweetVideo(fileName):
             message = 'Garden timelapse - %s' % yesterday.strftime('%d-%m-%Y')
             video = open(fileName, 'rb')
 
+            timestampedMessage("Connection okay: attempting to send tweet")
             # try so that if it mucks up/timesout then it'll retry
             try:
+                timestampedMessage("Uploading Video")
                 response = twitter.upload_video(
                     media=video,
                     media_type='video/mp4',
                     media_category='tweet_video',
                     check_progress=True)
 
+                timestampedMessage("Posting tweet")
                 twitter.update_status(
                     status=message, media_ids=[response['media_id']])
+                timestampedMessage("Tweet successfully posted")
                 return
             except exceptions.TwythonError:
                 attempt += 1
+                timestampedMessage("Error")
 
         # If internet is not currently available then wait and retry
         else:
-            sleep(15)
             attempt += 1
+            if attempt < maxAttempts:
+                retryStr = "No connection for attempt. Retrying in 15 seconds."
+            else:
+                retryStr = "Attempt limit reached. Giving up!"
+            timestampedMessage(retryStr)
+            sleep(15)
 
 
 if len(sys.argv) > 1:
     fps = sys.argv[1]
 else:
     fps = "15"
+
+timestampedMessage("Script started")
 
 # Generate string for yesterdays files
 yesterday = date.today() - timedelta(1)
@@ -97,11 +116,13 @@ archiveFile = os.path.join(dirs['archiveDir'], yesterdayStr)
 # Check if output file already exists
 if not(os.path.exists(outputFile)):
     # If not generate mp4 from the still images recorded the day before
+    timestampedMessage("Encoding video")
     os.system(
         'cat %s | ' % inputFiles +
         'ffmpeg -loglevel 10 -nostats -framerate %s -f image2pipe ' % fps +
         '-vcodec mjpeg -i - -vcodec libx264 -b:v 2048k -y temp.mov'
     )
+    timestampedMessage("Cutting video")
     # Cut before dawn and after dusk
     os.system(
         'ffmpeg -loglevel 10 -nostats -i temp.mov ' +
@@ -111,6 +132,7 @@ if not(os.path.exists(outputFile)):
     os.remove('temp.mov')
 
 # Archive the images used for the video and delete original folder
+timestampedMessage("Archiving video")
 make_archive(archiveFile, 'zip', dirs['inputDir'])
 # rmtree(dir['inputDir'])
 
