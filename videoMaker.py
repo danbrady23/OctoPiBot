@@ -16,10 +16,8 @@ from auth import (
 
 
 def timestampedMessage(messageString):
-    print(
-        "%s - %s" %
-        (datetime.now().time().strftime('%H:%M:%S'), messageString)
-    )
+    formatStr = "%Y-%m-%d - %H:%M:%S"
+    print("%s - %s" % (datetime.now().strftime(formatStr), messageString))
 
 
 # Function to check internet connectivity
@@ -38,6 +36,7 @@ def tweetVideo(fileName):
     # Set attempts for while loop below
     attempt = 0
     maxAttempts = 5
+    secsBetweenRetries = 15
 
     while attempt < maxAttempts:
         # This section posts the video to twitter if the internet is connected
@@ -72,11 +71,12 @@ def tweetVideo(fileName):
         else:
             attempt += 1
             if attempt < maxAttempts:
-                retryStr = "No connection for attempt. Retrying in 15 seconds."
+                retryStr = ("No connection for attempt %d. " % (attempt + 1) +
+                            "Retrying in %d seconds." % secsBetweenRetries)
             else:
                 retryStr = "Attempt limit reached. Giving up!"
             timestampedMessage(retryStr)
-            sleep(15)
+            sleep(secsBetweenRetries)
 
 
 if len(sys.argv) > 1:
